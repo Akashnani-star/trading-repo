@@ -4,6 +4,7 @@ import pandas as pd
 import datetime
 import threading as th
 from utils import get_random_cp
+import xlsxwriter
 
 last_time = None
 global_instruments_set = set()
@@ -12,21 +13,35 @@ triggering_instruments_list = []
 
 def set_tp_sl(instruments):
 	global triggering_instruments_list
-	for instrument in instruments:
-		print("stock details = ",instrument)
-		res = input("interested in this instrument?(Y/N) = ")
-		if res == "Y":
-			sl = int(input("enter sl = "))
-			tp = int(input("enter target = "))
-			triggering_instruments_list.append((instrument,sl,tp))
+	for instrument in instruments:		
+		if(len(triggering_instruments_list)==0):
+			print("stock details = ",instrument)
+			res = input("interested in this instrument?(Y/N) = ")
+			if res == "Y":
+				sl = int(input("enter sl = "))
+				tp = int(input("enter target = "))
+				triggering_instruments_list.append((instrument,sl,tp))
+		else:
+			for updated_instrument in triggering_instruments_list:
+				if(instrument!=updated_instrument[0]):
+					print("stock details = ",instrument)
+					res = input("interested in this instrument?(Y/N) = ")
+					if res == "Y":
+						sl = int(input("enter sl = "))
+						tp = int(input("enter target = "))
+						triggering_instruments_list.append((instrument,sl,tp))
 	print("done")
 
 def get_instruments_from_excel():
 	global excel_sheet
 	instruments = []
+	global temp
+	temp=[]
+	temp.append("stock name")
 	df = pd.read_excel(excel_sheet)
 	for j in df["stock name"]:
 		instruments.append(j)
+		temp.append(j)
 	return instruments
 
 # * Will get the instruments ordered by phone also
@@ -45,7 +60,7 @@ def get_instruments_for_15_minutes():
 	time_delta = 0
 	if last_time is not None:
 		time_delta = (datetime.datetime.now() - last_time).seconds
-	if time_delta >= 900 or time_delta == 0:
+	if time_delta >= 120 or time_delta == 0:
 		print(datetime.datetime.now())
 		last_time = datetime.datetime.now()
 		global_instruments_set = get_instruments()
@@ -88,10 +103,18 @@ def check_target_and_sl():
 				elif trigger_instrument[2] <= i[1]:
 					execute("BUY",trigger_instrument[0],"target reached")
 					triggered_instruments.append(trigger_instrument[0])
+	row=0
 	for i in triggered_instruments:
 		for j in triggering_instruments_list:
 			if j[0] == i:
 				triggering_instruments_list.remove(j)
+				temp.remove(i)
+				workbook = xlsxwriter.Workbook('candles_formed.xlsx')
+				worksheet = workbook.add_worksheet()
+				for item in temp:
+					worksheet.write(row,0, item)
+					row += 1    
+				workbook.close()
 				break
 
 while True:
