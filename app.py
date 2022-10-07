@@ -13,8 +13,10 @@ triggering_instruments_list = []
 
 def set_tp_sl(instruments):
 	global triggering_instruments_list
-	for instrument in instruments:		
+	print(instruments)
+	for instrument in instruments:
 		if(len(triggering_instruments_list)==0):
+			print("Hello from if")
 			print("stock details = ",instrument)
 			res = input("interested in this instrument?(Y/N) = ")
 			if res == "Y":
@@ -22,15 +24,14 @@ def set_tp_sl(instruments):
 				tp = int(input("enter target = "))
 				triggering_instruments_list.append((instrument,sl,tp))
 		else:
-			for updated_instrument in triggering_instruments_list:
-				if(instrument!=updated_instrument[0]):
-					print("stock details = ",instrument)
-					res = input("interested in this instrument?(Y/N) = ")
-					if res == "Y":
-						sl = int(input("enter sl = "))
-						tp = int(input("enter target = "))
-						triggering_instruments_list.append((instrument,sl,tp))
-	print("done")
+			if not (instrument in triggering_instruments_list):
+				print("Hello from else")
+				print("stock details = ",instrument)
+				res = input("interested in this instrument?(Y/N) = ")
+				if res == "Y":
+					sl = int(input("enter sl = "))
+					tp = int(input("enter target = "))
+					triggering_instruments_list.append((instrument,sl,tp))
 
 def get_instruments_from_excel():
 	global excel_sheet
@@ -108,7 +109,7 @@ def check_target_and_sl():
 		for j in triggering_instruments_list:
 			if j[0] == i:
 				triggering_instruments_list.remove(j)
-				#global_instruments_set.remove(i)
+				global_instruments_set.remove(i)
 				try:
 					temp.remove(i)
 				except:
