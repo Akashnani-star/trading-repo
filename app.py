@@ -46,7 +46,7 @@ def get_instruments_from_excel():
 
 # * Will get the instruments ordered by phone also
 def get_instruments_from_all_orders():
-	return ["9th stock"]
+	return ["1st Stock"]
 
 # * Merges the instruments in excel and by phone also
 def get_instruments():
@@ -60,7 +60,7 @@ def get_instruments_for_15_minutes():
 	time_delta = 0
 	if last_time is not None:
 		time_delta = (datetime.datetime.now() - last_time).seconds
-	if time_delta >= 120 or time_delta == 0:
+	if time_delta >= 900 or time_delta == 0:
 		print(datetime.datetime.now())
 		last_time = datetime.datetime.now()
 		global_instruments_set = get_instruments()
@@ -108,7 +108,11 @@ def check_target_and_sl():
 		for j in triggering_instruments_list:
 			if j[0] == i:
 				triggering_instruments_list.remove(j)
-				temp.remove(i)
+				#global_instruments_set.remove(i)
+				try:
+					temp.remove(i)
+				except:
+					pass
 				workbook = xlsxwriter.Workbook('candles_formed.xlsx')
 				worksheet = workbook.add_worksheet()
 				for item in temp:
